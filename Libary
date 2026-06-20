@@ -1,0 +1,69 @@
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
+/**
+ * A record of a single borrow or return event. Instances are
+ * pushed onto the library's Stack<Transaction> history.
+ */
+public class Transaction {
+
+    /** The kind of operation a transaction represents. */
+    public enum Type {
+        BORROW, RETURN
+    }
+
+    private static final DateTimeFormatter FORMAT =
+            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+    private final int transactionId;
+    private final int studentId;
+    private final String studentName;
+    private final int bookId;
+    private final String bookTitle;
+    private final Type type;
+    private final LocalDateTime timestamp;
+
+    public Transaction(int transactionId, Student student, Book book, Type type) {
+        this.transactionId = transactionId;
+        this.studentId = student.getId();
+        this.studentName = student.getName();
+        this.bookId = book.getId();
+        this.bookTitle = book.getTitle();
+        this.type = type;
+        this.timestamp = LocalDateTime.now();
+    }
+
+    public int getTransactionId() {
+        return transactionId;
+    }
+
+    public int getStudentId() {
+        return studentId;
+    }
+
+    public String getStudentName() {
+        return studentName;
+    }
+
+    public int getBookId() {
+        return bookId;
+    }
+
+    public String getBookTitle() {
+        return bookTitle;
+    }
+
+    public Type getType() {
+        return type;
+    }
+
+    public LocalDateTime getTimestamp() {
+        return timestamp;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("[%s] #%-3d %-6s \"%s\" by %s",
+                timestamp.format(FORMAT), transactionId, type, bookTitle, studentName);
+    }
+}
