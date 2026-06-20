@@ -1,0 +1,50 @@
+/**
+ * Abstract base class for every person in the library system.
+ */
+public abstract class Person {
+
+    private int id;
+    private String name;
+    private String email;
+
+    protected Person(int id, String name, String email) {
+        this.id = id;
+        this.name = name;
+        this.email = email;
+    }
+
+    /** @return the role label for this person (e.g. "Student", "Librarian"). */
+    public abstract String getRole();
+
+    /** @return a human-readable summary of what this person is allowed to do. */
+    public abstract String getPermissionsSummary();
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("[%s #%d] %s <%s>", getRole(), id, name, email);
+    }
+}
