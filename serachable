@@ -1,0 +1,24 @@
+import java.util.List;
+
+/**
+ * Contract for catalogue search behaviour (the required interface).
+ * Implemented by Library using two algorithms: linear search by title
+ * and binary search by id.
+ */
+public interface Searchable {
+
+    /**
+     * Linear search across the catalogue.
+     * @param keyword case-insensitive substring of the title
+     * @return every matching book (an empty list if none match)
+     */
+    List<Book> searchByTitle(String keyword);
+
+    /**
+     * Binary search by unique book id.
+     * @param id the id to locate
+     * @return the matching book
+     * @throws BookNotFoundException if no book has that id
+     */
+    Book searchById(int id) throws BookNotFoundException;
+}
