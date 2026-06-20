@@ -1,0 +1,299 @@
+import java.util.List;
+import java.util.Scanner;
+
+/**
+ * Interactive, menu-driven console front-end. Robust against bad input: every
+ * numeric read is validated and the program never crashes on invalid entry.
+ * In BlueJ: right-click this class, run main, and type in the Terminal window.
+ */
+public class Main {
+
+    private final Library library = new Library();
+    private final Scanner scanner = new Scanner(System.in);
+
+    public static void main(String[] args) {
+        Main app = new Main();
+        app.seedData();
+        app.run();
+    }
+
+    /** Seed a few users and books so the system is usable immediately. */
+    private void seedData() {
+        library.registerLibrarian(new Librarian(1, "Alice Librarian", "alice@library.org"));
+        library.registerStudent(new Student(101, "Samih", "samih@example.com"));
+        library.registerStudent(new Student(102, "Yousef", "yousef@example.com"));
+        library.registerStudent(new Student(103, "Lina", "lina@example.com"));
+
+        safeAdd(new Book(1, "Intro to Algorithms", "Cormen et al.", "Algorithms", 1));
+        safeAdd(new Book(2, "Effective Java", "Joshua Bloch", "Java", 3));
+        safeAdd(new Book(5, "Clean Code", "Robert C. Martin", "Software", 2));
+        safeAdd(new Book(7, "The Pragmatic Programmer", "Hunt & Thomas", "Software", 1));
+        safeAdd(new Book(9, "Design Patterns", "Gamma et al.", "Software", 2));
+    }
+
+    private void safeAdd(Book book) {
+        try {
+            library.addBook(book);
+        } catch (RuntimeException ignored) {
+            // seed data is trusted; ignore duplicates
+        }
+    }
+
+    private void run() {
+        System.out.println("============================================");
+        System.out.println("   Smart Library Management System");
+        System.out.println("============================================");
+
+        boolean running = true;
+        while (running) {
+            System.out.println("\nMain menu:");
+            System.out.println("  1) Login as Librarian");
+            System.out.println("  2) Login as Student");
+            System.out.println("  0) Exit");
+            int choice = readInt("Choose: ");
+            switch (choice) {
+                case 1:
+                    librarianMenu();
+                    break;
+                case 2:
+                    studentMenu();
+                    break;
+                case 0:
+                    running = false;
+                    break;
+                default:
+                    System.out.println("  Please choose 0, 1 or 2.");
+            }
+        }
+        System.out.println("Goodbye.");
+    }
+
+    /* --------------------------------- librarian --------------------------------- */
+
+    private void librarianMenu() {
+        List<Librarian> librarians = library.getLibrarians();
+        if (librarians.isEmpty()) {
+            System.out.println("  No librarians registered.");
+            return;
+        }
+        Librarian librarian = librarians.get(0); // single librarian for simplicity
+        System.out.println("  Logged in as " + librarian.getName());
+
+        boolean active = true;
+        while (active) {
+            System.out.println("\nLibrarian menu:");
+            System.out.println("  1) Add book");
+            System.out.println("  2) Remove book");
+            System.out.println("  3) Update book");
+            System.out.println("  4) View all books");
+            System.out.println("  5) View borrowed books");
+            System.out.println("  0) Logout");
+            int choice = readInt("Choose: ");
+            switch (choice) {
+                case 1:
+                    addBookFlow();
+                    break;
+                case 2:
+                    removeBookFlow();
+                    break;
+                case 3:
+                    updateBookFlow();
+                    break;
+                case 4:
+                    showBooks(library.getAllBooks());
+                    break;
+                case 5:
+                    showBooks(library.getBorrowedBooks());
+                    break;
+                case 0:
+                    active = false;
+                    break;
+                default:
+                    System.out.println("  Invalid option.");
+            }
+        }
+    }
+
+    private void addBookFlow() {
+        int id = readInt("  New book id: ");
+        String title = readLine("  Title: ");
+        String author = readLine("  Author: ");
+        String category = readLine("  Category: ");
+        int copies = readInt("  Total copies: ");
+        try {
+            library.addBook(new Book(id, title, author, category, Math.max(1, copies)));
+            System.out.println("  Added.");
+        } catch (RuntimeException e) {
+            System.out.println("  Could not add: " + e.getMessage());
+        }
+    }
+
+    private void removeBookFlow() {
+        int id = readInt("  Book id to remove: ");
+        try {
+            library.removeBook(id);
+            System.out.println("  Removed.");
+        } catch (BookNotFoundException e) {
+            System.out.println("  " + e.getMessage());
+        }
+    }
+
+    private void updateBookFlow() {
+        int id = readInt("  Book id to update: ");
+        System.out.println("  Leave a field blank to keep it unchanged.");
+        String title = blankToNull(readLine("  New title: "));
+        String author = blankToNull(readLine("  New author: "));
+        String category = blankToNull(readLine("  New category: "));
+        String copiesRaw = readLine("  New total copies: ");
+        Integer copies = null;
+        if (!copiesRaw.trim().isEmpty()) {
+            try {
+                copies = Integer.parseInt(copiesRaw.trim());
+            } catch (NumberFormatException e) {
+                System.out.println("  (ignored non-numeric copies)");
+            }
+        }
+        try {
+            library.updateBook(id, title, author, category, copies);
+            System.out.println("  Updated.");
+        } catch (BookNotFoundException e) {
+            System.out.println("  " + e.getMessage());
+        }
+    }
+
+    /* ---------------------------------- student ---------------------------------- */
+
+    private void studentMenu() {
+        List<Student> students = library.getStudents();
+        if (students.isEmpty()) {
+            System.out.println("  No students registered.");
+            return;
+        }
+        System.out.println("  Registered students:");
+        for (Student s : students) {
+            System.out.println("    " + s.getId() + " - " + s.getName());
+        }
+        int id = readInt("  Enter your student id: ");
+        Student student = null;
+        for (Student s : students) {
+            if (s.getId() == id) {
+                student = s;
+                break;
+            }
+        }
+        if (student == null) {
+            System.out.println("  No student with id " + id + ".");
+            return;
+        }
+        System.out.println("  Logged in as " + student.getName());
+
+        boolean active = true;
+        while (active) {
+            System.out.println("\nStudent menu (" + student.getName() + "):");
+            System.out.println("  1) Search by title");
+            System.out.println("  2) Search by id");
+            System.out.println("  3) Borrow book");
+            System.out.println("  4) Return book");
+            System.out.println("  5) View my history");
+            System.out.println("  0) Logout");
+            int choice = readInt("Choose: ");
+            switch (choice) {
+                case 1:
+                    showBooks(library.searchByTitle(readLine("  Title keyword: ")));
+                    break;
+                case 2:
+                    searchByIdFlow();
+                    break;
+                case 3:
+                    borrowFlow(student);
+                    break;
+                case 4:
+                    returnFlow(student);
+                    break;
+                case 5:
+                    showHistory(library.getBorrowingHistory(student));
+                    break;
+                case 0:
+                    active = false;
+                    break;
+                default:
+                    System.out.println("  Invalid option.");
+            }
+        }
+    }
+
+    private void searchByIdFlow() {
+        int id = readInt("  Book id: ");
+        try {
+            System.out.println("  " + library.searchById(id));
+        } catch (BookNotFoundException e) {
+            System.out.println("  " + e.getMessage());
+        }
+    }
+
+    private void borrowFlow(Student student) {
+        int id = readInt("  Book id to borrow: ");
+        try {
+            library.borrowBook(student, id);
+            System.out.println("  Borrowed.");
+        } catch (InvalidUserException | BookNotFoundException | BookUnavailableException e) {
+            System.out.println("  " + e.getMessage());
+        }
+    }
+
+    private void returnFlow(Student student) {
+        int id = readInt("  Book id to return: ");
+        try {
+            library.returnBook(student, id);
+            System.out.println("  Done.");
+        } catch (InvalidUserException | BookNotFoundException e) {
+            System.out.println("  " + e.getMessage());
+        }
+    }
+
+    /* ---------------------------------- printing --------------------------------- */
+
+    private void showBooks(List<Book> books) {
+        if (books.isEmpty()) {
+            System.out.println("  (no books)");
+            return;
+        }
+        for (Book b : books) {
+            System.out.println("  " + b);
+        }
+    }
+
+    private void showHistory(List<Transaction> txns) {
+        if (txns.isEmpty()) {
+            System.out.println("  (no transactions yet)");
+            return;
+        }
+        for (Transaction t : txns) {
+            System.out.println("  " + t);
+        }
+    }
+
+    /* -------------------------------- safe input --------------------------------- */
+
+    /** Reads an int, re-prompting until valid. Never throws on bad input. */
+    private int readInt(String prompt) {
+        while (true) {
+            System.out.print(prompt);
+            String line = scanner.hasNextLine() ? scanner.nextLine() : "0";
+            try {
+                return Integer.parseInt(line.trim());
+            } catch (NumberFormatException e) {
+                System.out.println("  Please enter a whole number.");
+            }
+        }
+    }
+
+    private String readLine(String prompt) {
+        System.out.print(prompt);
+        return scanner.hasNextLine() ? scanner.nextLine() : "";
+    }
+
+    private static String blankToNull(String s) {
+        return (s == null || s.trim().isEmpty()) ? null : s.trim();
+    }
+}
