@@ -1,0 +1,9 @@
+/** Thrown when a requested book id or title does not exist in the catalogue. */
+public class BookNotFoundException extends Exception {
+
+    private static final long serialVersionUID = 1L;
+
+    public BookNotFoundException(String message) {
+        super(message);
+    }
+}
