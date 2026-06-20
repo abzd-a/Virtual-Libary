@@ -1,0 +1,9 @@
+/** Thrown when an operation references a user who is not registered in the system. */
+public class InvalidUserException extends Exception {
+
+    private static final long serialVersionUID = 1L;
+
+    public InvalidUserException(String message) {
+        super(message);
+    }
+}
