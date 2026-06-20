@@ -1,0 +1,52 @@
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * A library member who can search, borrow and return books.
+ * Polymorphism: overrides getRole() and getPermissionsSummary() with
+ * student-specific behaviour, plus a borrow limit enforced by Library.
+ */
+public class Student extends Person {
+
+    /** Maximum number of books a student may hold at one time. */
+    public static final int BORROW_LIMIT = 3;
+
+    /** Books the student currently holds (not yet returned). */
+    private final List<Book> borrowedBooks = new ArrayList<Book>();
+
+    public Student(int id, String name, String email) {
+        super(id, name, email);
+    }
+
+    @Override
+    public String getRole() {
+        return "Student";
+    }
+
+    @Override
+    public String getPermissionsSummary() {
+        return "Search, borrow and return books; view personal history "
+                + "(may hold up to " + BORROW_LIMIT + " books).";
+    }
+
+    /** @return a defensive copy so the internal list stays encapsulated. */
+    public List<Book> getBorrowedBooks() {
+        return new ArrayList<Book>(borrowedBooks);
+    }
+
+    public boolean hasReachedBorrowLimit() {
+        return borrowedBooks.size() >= BORROW_LIMIT;
+    }
+
+    public boolean isHolding(Book book) {
+        return borrowedBooks.contains(book);
+    }
+
+    public void addBorrowedBook(Book book) {
+        borrowedBooks.add(book);
+    }
+
+    public void removeBorrowedBook(Book book) {
+        borrowedBooks.remove(book);
+    }
+}
