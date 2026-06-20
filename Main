@@ -4,7 +4,6 @@ import java.util.Scanner;
 /**
  * Interactive, menu-driven console front-end. Robust against bad input: every
  * numeric read is validated and the program never crashes on invalid entry.
- * In BlueJ: right-click this class, run main, and type in the Terminal window.
  */
 public class Main {
 
