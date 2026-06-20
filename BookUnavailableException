@@ -1,0 +1,9 @@
+/** Thrown when every copy of a book is borrowed (or the borrow is otherwise refused). */
+public class BookUnavailableException extends Exception {
+
+    private static final long serialVersionUID = 1L;
+
+    public BookUnavailableException(String message) {
+        super(message);
+    }
+}
